@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <windows.h>
+#include <functional>
+#include <thread>
 
 // 偶数関数
 int EvenNumber(int num) {
@@ -11,56 +13,43 @@ int EvenNumber(int num) {
 int OddNumber(int num) {
     return  num % 2 != 0;
 }
-// 結果
-void Check(int dice_roll, int (*numberChecker)(int)) {
-    printf("サイコロの出目は %d でした。\n", dice_roll);
-    if (numberChecker(dice_roll)) {
-        printf("正解\n");
-    }
-    else {
-        printf("不正解\n");
-    }
+
+void SetTimeout(int time) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(time));
 }
 
 int main() {
-	
-    int guess;
-    int dice_roll;
-
     // 乱数のシードを初期化
     srand((unsigned int)time(NULL));
+	
+    int guess;
+    int dice_roll = rand() % 6 + 1;
+
 
     printf("半か丁か予想してください。\n半なら1、丁なら2を入力してください: ");
     scanf_s("%d", &guess);
 
-    // 関数ポインタ
-    int (*numberChecker)(int);
-
-    if (guess == 1) {
-        numberChecker = OddNumber;
-    }
-    else if (guess == 2) {
-        numberChecker = EvenNumber;
-    }
-    else {
-        printf("無効なデータを読み取りました。終了します。");
-        return 0;
-    }
-
-    // サイコロを振る (1から6のランダムな数を生成)
-    dice_roll = rand() % 6 + 1;
-
     // 3秒待機
     printf("サイコロを振っています");
-    Sleep(1000);
-    printf(".");
-    Sleep(1000);
-    printf(".");
-    Sleep(1000);
-    printf(".\n");
+    for (int i = 0; i < 3; ++i) {
+        SetTimeout(1000);
+        printf(".");
+    }
+
+    // ラムダ式
+    std::function<void()> fx = [dice_roll, guess]() {
+
+        printf("\nサイコロの出目は %d でした。\n", dice_roll);
+        if ((guess == 1 && OddNumber(dice_roll)) || (guess == 2 && EvenNumber(dice_roll))) {
+            printf("正解\n");
+        }
+        else {
+            printf("不正解\n");
+        }
+    };
 
     // 正解かチェック
-    Check(dice_roll, numberChecker);
+    fx();
 
 	return 0;
 }
