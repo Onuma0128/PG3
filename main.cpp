@@ -1,32 +1,29 @@
 #include <iostream>
-#include <fstream>
-#include <vector>
-#include <string>
-#include <algorithm>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 
-using namespace std;
+std::mutex order_mutex;
+std::condition_variable cv;
+int current_order = 1;
+
+void ThreadTask(int num) {
+    std::unique_lock<std::mutex> lock(order_mutex);
+    cv.wait(lock, [num] { return current_order == num; });
+    std::cout << "thread " << num << std::endl;
+    current_order++;
+    cv.notify_all();
+}
 
 int main() {
-    // ID格納vector
-    vector<string> studentID;
 
-    // ファイルを読み込みIDを格納
-    ifstream filePath("PG3.txt");
-    string id;
-    while (getline(filePath, id, ',')) {
-        studentID.push_back(id);
-    }
-    // 閉じる
-    filePath.close();
+    std::thread th1(ThreadTask, 1);
+    std::thread th2(ThreadTask, 2);
+    std::thread th3(ThreadTask, 3);
 
-    // 昇順にソート
-    sort(studentID.begin(), studentID.end());
-
-    // ソートされたIDを描画
-    cout << "ソートされたメールアドレス一覧:" << endl;
-    for (const auto& id : studentID) {
-        cout << id << endl;
-    }
+    th1.join();
+    th2.join();
+    th3.join();
 
     return 0;
 }
