@@ -1,29 +1,26 @@
 #include <iostream>
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-
-std::mutex order_mutex;
-std::condition_variable cv;
-int current_order = 1;
-
-void ThreadTask(int num) {
-    std::unique_lock<std::mutex> lock(order_mutex);
-    cv.wait(lock, [num] { return current_order == num; });
-    std::cout << "thread " << num << std::endl;
-    current_order++;
-    cv.notify_all();
-}
+#include <string>
+#include <chrono>
 
 int main() {
 
-    std::thread th1(ThreadTask, 1);
-    std::thread th2(ThreadTask, 2);
-    std::thread th3(ThreadTask, 3);
+    std::string a(100000, 'a');
 
-    th1.join();
-    th2.join();
-    th3.join();
+    // コピー計測
+    auto start_copy = std::chrono::high_resolution_clock::now();
+    std::string b = a;  // コピー
+    auto end_copy = std::chrono::high_resolution_clock::now();
+    auto copy_time = std::chrono::duration_cast<std::chrono::microseconds>(end_copy - start_copy).count();
+
+    // ムーブ計測
+    auto start_move = std::chrono::high_resolution_clock::now();
+    std::string c = std::move(a);  // ムーブ
+    auto end_move = std::chrono::high_resolution_clock::now();
+    auto move_time = std::chrono::duration_cast<std::chrono::microseconds>(end_move - start_move).count();
+
+    // 結果表示
+    std::cout << "Copy time: " << copy_time << " μs" << std::endl;
+    std::cout << "Move time: " << move_time << " μs" << std::endl;
 
     return 0;
 }
