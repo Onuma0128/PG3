@@ -16,8 +16,7 @@ void Check(int dice_roll, int (*numberChecker)(int)) {
     printf("サイコロの出目は %d でした。\n", dice_roll);
     if (numberChecker(dice_roll)) {
         printf("正解\n");
-    }
-    else {
+    } else {
         printf("不正解\n");
     }
 }
@@ -38,11 +37,9 @@ int main() {
 
     if (guess == 1) {
         numberChecker = OddNumber;
-    }
-    else if (guess == 2) {
+    } else if (guess == 2) {
         numberChecker = EvenNumber;
-    }
-    else {
+    } else {
         printf("無効なデータを読み取りました。終了します。");
         return 0;
     }
